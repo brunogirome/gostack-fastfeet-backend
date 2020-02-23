@@ -17,7 +17,7 @@ class Mail {
       auth: auth.user ? auth : null,
     });
 
-    // this.configureTemplates();
+    this.configureTemplates();
   }
 
   configureTemplates() {
@@ -30,7 +30,7 @@ class Mail {
         // Localização dos componentes da ViewEngine
         viewEngine: exphbs.create({
           layoutsDir: resolve(viewPath, 'layouts'),
-          partialDir: resolve(viewPath, 'partials'),
+          partialsDir: resolve(viewPath, 'partials'),
           defaultLayout: resolve(viewPath, 'layouts', 'default'),
           extname: '.hbs',
         }),

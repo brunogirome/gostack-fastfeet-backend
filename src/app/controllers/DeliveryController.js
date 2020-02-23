@@ -1,7 +1,10 @@
 import * as Yup from 'yup';
+
 import Delivery from '../models/Delivery';
 import Recipient from '../models/Recipient';
 import Deliveryman from '../models/Deliveryman';
+
+import Mail from '../../lib/Mail';
 
 class DeliveryController {
   async store(req, res) {
@@ -30,6 +33,12 @@ class DeliveryController {
     }
 
     const delivery = await Delivery.create(req.body);
+
+    await Mail.sendMail({
+      to: `${recipient.recipient_name} <${deliveryman.email}>`,
+      subject: 'New delivery avalible',
+      text: 'You have a new delivery',
+    });
 
     return res.json(delivery);
   }

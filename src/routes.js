@@ -17,7 +17,7 @@ routes.post('/sessions', SessionController.store);
 routes.get('/recipients/:id', RecipientController.show);
 
 /**
- * Routs who need authetication
+ * Routes that need authetication
  */
 routes.use(authMiddleware);
 
@@ -26,7 +26,9 @@ routes.post('/recipients', RecipientController.store);
 
 routes.post('/files', upload.single('file'), FileController.store);
 
-routes.post('/deliverymans', DeliverymanController.store);
 routes.get('/deliverymans', DeliverymanController.index);
+routes.post('/deliverymans', DeliverymanController.store);
+routes.put('/deliverymans/:id', DeliverymanController.update);
+routes.delete('/deliverymans/:id', DeliverymanController.delete);
 
 export default routes;

@@ -24,6 +24,10 @@ routes.put(
   '/deliverymans/:deliveryman_id/withdraws/:delivery_id',
   WithdrawController.update
 );
+routes.put(
+  '/deliverymans/:deliveryman_id/deliver/:delivery_id',
+  DeliveredController.update
+);
 routes.get('/deliverymans/:id/delivereds', DeliveredController.index);
 
 /**

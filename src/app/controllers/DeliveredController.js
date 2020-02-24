@@ -1,7 +1,10 @@
 import { Op } from 'sequelize';
+import * as Yup from 'yup';
+import { parseISO, isBefore, format } from 'date-fns';
 import Deliveryman from '../models/Deliveryman';
 import Delivery from '../models/Delivery';
 import Recipient from '../models/Recipient';
+import File from '../models/File';
 
 class DeliveredController {
   async index(req, res) {
@@ -33,34 +36,56 @@ class DeliveredController {
   }
 
   async update(req, res) {
-    /**
-     * End a delivery
-     */
+    const schema = Yup.object().shape({
+      end_date: Yup.date().required(),
+      signature_id: Yup.number().required(),
+    });
 
-    if (end_date && !delivery.start_date) {
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation fails' });
+    }
+
+    const { deliveryman_id, delivery_id } = req.params;
+
+    const delivery = await Delivery.findOne({
+      where: { id: delivery_id, deliveryman_id },
+    });
+
+    if (!delivery) {
+      return res.status(400).json({ error: 'Invalid delivery id' });
+    }
+
+    if (delivery.canceled_at) {
+      return res.status(400).json({ error: 'Delivery canceled' });
+    }
+
+    if (delivery.end_date) {
+      return res.status(400).json({ error: 'Delivery already endend' });
+    }
+
+    if (!delivery.start_date) {
       return res
         .status(400)
-        .json({ error: 'Can not send a end date without a start date' });
+        .json({ error: 'Delivery has not yet been withdraw' });
     }
 
-    if (end_date) {
-      const signature = await File.findByPk(signature_id);
+    const { end_date, signature_id } = req.body;
 
-      if (!signature) {
-        return res
-          .status(400)
-          .json({ error: 'Signature file does not exists' });
-      }
+    const signature = await File.findByPk(signature_id);
 
-      const delivery_start = format(
-        delivery.start_date,
-        "yyyy-MM-dd'T'HH:mm:ssxxx"
-      );
-
-      if (isBefore(parseISO(end_date), parseISO(delivery_start))) {
-        return res.status(400).json({ error: 'Invalid end date' });
-      }
+    if (!signature) {
+      return res.status(400).json({ error: 'Invalid recipient signature' });
     }
+
+    const start_date = format(delivery.start_date, "yyyy-MM-dd'T'HH:mm:ssxxx");
+
+    if (isBefore(parseISO(end_date), parseISO(start_date))) {
+      return res.status(400).json({ error: 'Invalid end date' });
+    }
+
+    await delivery.update({ end_date, signature_id });
+
+    return res.json(delivery);
   }
 }
 

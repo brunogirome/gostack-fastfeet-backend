@@ -143,6 +143,20 @@ class DeliveryController {
 
     return res.json({ id, withdrawble, deliveryman, start_date, end_date });
   }
+
+  async delete(req, res) {
+    const delivery = await Delivery.findByPk(req.params.id);
+
+    if (delivery.canceled_at !== null) {
+      return res.status(400).json({ error: 'Delivery already canceled' });
+    }
+
+    const { canceled_at } = req.query;
+
+    await delivery.update({ canceled_at });
+
+    return res.status(204).json();
+  }
 }
 
 export default new DeliveryController();

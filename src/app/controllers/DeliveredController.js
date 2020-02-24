@@ -31,6 +31,37 @@ class DeliveredController {
 
     return res.json(deliveries);
   }
+
+  async update(req, res) {
+    /**
+     * End a delivery
+     */
+
+    if (end_date && !delivery.start_date) {
+      return res
+        .status(400)
+        .json({ error: 'Can not send a end date without a start date' });
+    }
+
+    if (end_date) {
+      const signature = await File.findByPk(signature_id);
+
+      if (!signature) {
+        return res
+          .status(400)
+          .json({ error: 'Signature file does not exists' });
+      }
+
+      const delivery_start = format(
+        delivery.start_date,
+        "yyyy-MM-dd'T'HH:mm:ssxxx"
+      );
+
+      if (isBefore(parseISO(end_date), parseISO(delivery_start))) {
+        return res.status(400).json({ error: 'Invalid end date' });
+      }
+    }
+  }
 }
 
 export default new DeliveredController();

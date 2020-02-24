@@ -20,6 +20,10 @@ routes.post('/sessions', SessionController.store);
 routes.get('/recipients/:id', RecipientController.show);
 
 routes.get('/deliverymans/:id/withdraws', WithdrawController.index);
+routes.put(
+  '/deliverymans/:deliveryman_id/withdraws/:delivery_id',
+  WithdrawController.update
+);
 routes.get('/deliverymans/:id/delivereds', DeliveredController.index);
 
 /**

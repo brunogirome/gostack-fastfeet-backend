@@ -6,7 +6,8 @@ import SessionController from './app/controllers/SessionController';
 import RecipientController from './app/controllers/RecipientController';
 import FileController from './app/controllers/FileController';
 import DeliverymanController from './app/controllers/DeliverymanController';
-import Delivery from './app/controllers/DeliveryController';
+import DeliveryController from './app/controllers/DeliveryController';
+import WithdrawController from './app/controllers/WithdrawController';
 
 import authMiddleware from './app/middlewares/auth';
 
@@ -16,6 +17,8 @@ const upload = multer(multerConfig);
 routes.post('/sessions', SessionController.store);
 
 routes.get('/recipients/:id', RecipientController.show);
+
+routes.get('/withdraws', WithdrawController.index);
 
 /**
  * Routes that need authetication
@@ -32,9 +35,9 @@ routes.get('/deliverymans', DeliverymanController.index);
 routes.put('/deliverymans/:id', DeliverymanController.update);
 routes.delete('/deliverymans/:id', DeliverymanController.delete);
 
-routes.post('/deliveries', Delivery.store);
-routes.get('/deliveries', Delivery.index);
-routes.put('/deliveries/:id', Delivery.update);
-routes.delete('/deliveries/:id', Delivery.delete);
+routes.post('/deliveries', DeliveryController.store);
+routes.get('/deliveries', DeliveryController.index);
+routes.put('/deliveries/:id', DeliveryController.update);
+routes.delete('/deliveries/:id', DeliveryController.delete);
 
 export default routes;

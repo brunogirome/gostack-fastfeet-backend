@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 
+import { isBefore, parseISO, format } from 'date-fns';
 import Delivery from '../models/Delivery';
 import Recipient from '../models/Recipient';
 import Deliveryman from '../models/Deliveryman';
@@ -99,9 +100,48 @@ class DeliveryController {
   async update(req, res) {
     const schema = Yup.object().shape({
       deliveryman_id: Yup.number(),
-      product: Yup.string(),
       end_date: Yup.date(),
     });
+
+    if (!(await schema.validate(req.body))) {
+      return res.status(400).json({ error: 'Validation fails' });
+    }
+
+    const delivery = await Delivery.findByPk(req.params.id);
+
+    if (!delivery) {
+      return res.status(400).json({ error: 'Delivery id not found' });
+    }
+
+    const { deliveryman_id, end_date } = req.body;
+
+    const deliveryman = await Deliveryman.findByPk(deliveryman_id);
+
+    if (!deliveryman) {
+      return res.status(400).json({ error: 'Deliveryman does not exists' });
+    }
+
+    let { start_date } = delivery;
+
+    if (end_date && !start_date) {
+      return res
+        .status(400)
+        .json({ error: 'Can not send a end date without a start date' });
+    }
+
+    start_date = format(start_date, "yyyy-MM-dd'T'HH:mm:ssxxx");
+
+    if (
+      end_date &&
+      start_date &&
+      isBefore(parseISO(end_date), parseISO(start_date))
+    ) {
+      return res.status(400).json({ error: 'Invalid end date' });
+    }
+
+    const { id, withdrawble } = await delivery.update(req.body);
+
+    return res.json({ id, withdrawble, deliveryman, start_date, end_date });
   }
 }
 

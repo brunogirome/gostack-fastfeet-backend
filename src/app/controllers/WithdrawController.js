@@ -46,8 +46,6 @@ class WithdrawController {
   }
 
   async update(req, res) {
-    const start_date = new Date();
-
     const { deliveryman_id, delivery_id } = req.params;
 
     const deliveryman = await Deliveryman.findByPk(deliveryman_id);
@@ -83,6 +81,7 @@ class WithdrawController {
     /**
      * Checking if it has more than 5 deliveries today
      */
+    const start_date = new Date();
 
     const deliveires = await Delivery.findAll({
       where: { deliveryman_id, canceled_at: null },

@@ -37,7 +37,6 @@ class DeliveredController {
 
   async update(req, res) {
     const schema = Yup.object().shape({
-      end_date: Yup.date().required(),
       signature_id: Yup.number().required(),
     });
 
@@ -69,7 +68,7 @@ class DeliveredController {
         .json({ error: 'Delivery has not yet been withdraw' });
     }
 
-    const { end_date, signature_id } = req.body;
+    const { signature_id } = req.body;
 
     const signature = await File.findByPk(signature_id);
 
@@ -77,9 +76,11 @@ class DeliveredController {
       return res.status(400).json({ error: 'Invalid recipient signature' });
     }
 
+    const end_date = new Date();
+
     const start_date = format(delivery.start_date, "yyyy-MM-dd'T'HH:mm:ssxxx");
 
-    if (isBefore(parseISO(end_date), parseISO(start_date))) {
+    if (isBefore(end_date, parseISO(start_date))) {
       return res.status(400).json({ error: 'Invalid end date' });
     }
 

@@ -3,6 +3,7 @@ import * as Yup from 'yup';
 import Delivery from '../models/Delivery';
 import Recipient from '../models/Recipient';
 import Deliveryman from '../models/Deliveryman';
+import File from '../models/File';
 
 import Mail from '../../lib/Mail';
 
@@ -53,6 +54,54 @@ class DeliveryController {
     });
 
     return res.json(delivery);
+  }
+
+  async index(req, res) {
+    const { page = 1 } = req.query;
+
+    const deliveries = await Delivery.findAll({
+      order: ['created_at'],
+      attributes: [
+        'id',
+        'product',
+        'canceled_at',
+        'start_date',
+        'end_date',
+        'withdrawable',
+      ],
+      limit: 10,
+      offset: (page - 1) * 10,
+      include: [
+        {
+          model: Recipient,
+          as: 'recipient',
+          attributes: ['recipient_name', 'state', 'city', 'zip_code'],
+        },
+        {
+          model: Deliveryman,
+          as: 'deliveryman',
+          attributes: ['name', 'email'],
+          include: [
+            { model: File, as: 'avatar', attributes: ['name', 'path', 'url'] },
+          ],
+        },
+        {
+          model: File,
+          as: 'signature',
+          attributes: ['name', 'path', 'url'],
+        },
+      ],
+    });
+
+    return res.json(deliveries);
+  }
+
+  async update(req, res) {
+    const schema = Yup.object().shape({
+      deliveryman_id: Yup.number(),
+      product: Yup.string(),
+      end_date: Yup.date(),
+    });
   }
 }
 

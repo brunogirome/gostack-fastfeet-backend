@@ -22,16 +22,17 @@ routes.get('/recipients/:id', RecipientController.show);
  */
 routes.use(authMiddleware);
 
-routes.get('/auth', (req, res) => res.json({ message: 'Authenticated' }));
 routes.post('/recipients', RecipientController.store);
+routes.get('/auth', (req, res) => res.json({ message: 'Authenticated' }));
 
 routes.post('/files', upload.single('file'), FileController.store);
 
-routes.get('/deliverymans', DeliverymanController.index);
 routes.post('/deliverymans', DeliverymanController.store);
+routes.get('/deliverymans', DeliverymanController.index);
 routes.put('/deliverymans/:id', DeliverymanController.update);
 routes.delete('/deliverymans/:id', DeliverymanController.delete);
 
-routes.post('/deliverys', Delivery.store);
+routes.post('/deliveries', Delivery.store);
+routes.get('/deliveries', Delivery.index);
 
 export default routes;

@@ -1,8 +1,9 @@
-import Delivery from '../models/Delivery';
+import { Op } from 'sequelize';
 import Deliveryman from '../models/Deliveryman';
+import Delivery from '../models/Delivery';
 import Recipient from '../models/Recipient';
 
-class WithdrawController {
+class DeliveredController {
   async index(req, res) {
     const { page = 1 } = req.query;
     const { id: deliveryman_id } = req.params;
@@ -10,40 +11,26 @@ class WithdrawController {
     const deliveryman = await Deliveryman.findByPk(deliveryman_id);
 
     if (!deliveryman) {
-      return res.status(400).json({ error: 'Invalid deliveryman id' });
+      return res.status(400).json({ error: 'Deliveryman does not exists' });
     }
 
     const deliveries = await Delivery.findAll({
       order: ['created_at'],
-      attributes: ['id', 'product'],
+      attributes: ['id', 'product', 'start_date', 'end_date'],
       limit: 10,
       offset: (page - 1) * 10,
       include: [
         {
           model: Recipient,
           as: 'recipient',
-          attributes: [
-            'recipient_name',
-            'street',
-            'number',
-            'complement',
-            'state',
-            'city',
-            'zip_code',
-          ],
+          attributes: ['recipient_name', 'state', 'city', 'zip_code'],
         },
       ],
-      where: {
-        deliveryman_id,
-        canceled_at: null,
-        end_date: null,
-        start_date: null,
-      },
+      where: { deliveryman_id, end_date: { [Op.not]: null } },
     });
 
     return res.json(deliveries);
   }
-
-  // async update(req, res) {}
 }
-export default new WithdrawController();
+
+export default new DeliveredController();

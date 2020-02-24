@@ -8,6 +8,7 @@ import FileController from './app/controllers/FileController';
 import DeliverymanController from './app/controllers/DeliverymanController';
 import DeliveryController from './app/controllers/DeliveryController';
 import WithdrawController from './app/controllers/WithdrawController';
+import DeliveredController from './app/controllers/DeliveredController';
 
 import authMiddleware from './app/middlewares/auth';
 
@@ -18,7 +19,8 @@ routes.post('/sessions', SessionController.store);
 
 routes.get('/recipients/:id', RecipientController.show);
 
-routes.get('/withdraws', WithdrawController.index);
+routes.get('/deliverymans/:id/withdraws', WithdrawController.index);
+routes.get('/deliverymans/:id/delivereds', DeliveredController.index);
 
 /**
  * Routes that need authetication

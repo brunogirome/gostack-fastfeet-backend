@@ -1,4 +1,4 @@
-import * as Yup from 'yup';
+import { format, parseISO, isSameDay } from 'date-fns';
 import Delivery from '../models/Delivery';
 import Deliveryman from '../models/Deliveryman';
 import Recipient from '../models/Recipient';
@@ -46,13 +46,7 @@ class WithdrawController {
   }
 
   async update(req, res) {
-    const schema = Yup.object().shape({
-      start_date: Yup.date().required(),
-    });
-
-    if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'Validation fails' });
-    }
+    const start_date = new Date();
 
     const { deliveryman_id, delivery_id } = req.params;
 
@@ -86,7 +80,34 @@ class WithdrawController {
         .json({ error: 'Delivery has already been withdrawn' });
     }
 
-    const { start_date } = req.body;
+    /**
+     * Checking if it has more than 5 deliveries today
+     */
+
+    const deliveires = await Delivery.findAll({
+      where: { deliveryman_id, canceled_at: null },
+    });
+
+    let deliveryCount = 0;
+
+    deliveires.forEach(deliveryItem => {
+      if (deliveryItem.start_date) {
+        const date = format(
+          deliveryItem.start_date,
+          "yyyy-MM-dd'T'HH:mm:ssxxx"
+        );
+
+        if (isSameDay(parseISO(date), start_date)) {
+          deliveryCount += 1;
+        }
+      }
+    });
+
+    if (deliveryCount >= 5) {
+      return res
+        .status(400)
+        .json({ error: 'You already made 5 deliveries today' });
+    }
 
     await delivery.update({ start_date });
 

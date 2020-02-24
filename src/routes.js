@@ -30,6 +30,8 @@ routes.put(
 );
 routes.get('/deliverymans/:id/delivereds', DeliveredController.index);
 
+routes.get('/files/:id', FileController.show);
+
 /**
  * Routes that need authetication
  */

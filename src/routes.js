@@ -60,4 +60,11 @@ routes.delete('/deliveries/:id', DeliveryController.delete);
 
 routes.get('/deliveries/problems', DeliveryProblemController.index);
 
+routes.get('/deliveries/:delivery_id/problems', DeliveryProblemController.show);
+
+routes.delete(
+  '/problems/:problem_id/cancel-delivery',
+  DeliveryProblemController.delete
+);
+
 export default routes;

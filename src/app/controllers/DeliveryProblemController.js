@@ -9,8 +9,10 @@ class DeliveryProblemController {
   async index(req, res) {
     const { page = 1 } = req.query;
 
-    const deliverys = await DeliveryProblem.findAll({
+    const deliveries = await DeliveryProblem.findAll({
+      attributes: [],
       limit: 10,
+      order: ['created_at'],
       offset: (page - 1) * 10,
       include: [
         {
@@ -51,7 +53,7 @@ class DeliveryProblemController {
       ],
     });
 
-    return res.json(deliverys);
+    return res.json(deliveries);
   }
 
   async store(req, res) {
@@ -79,6 +81,49 @@ class DeliveryProblemController {
     });
 
     return res.json({ id, delivery_id, description });
+  }
+
+  async show(req, res) {
+    const { delivery_id } = req.params;
+
+    const delivery = await Delivery.findByPk(delivery_id);
+
+    if (!delivery) {
+      return res.status(400).json({ error: 'Delivery not found' });
+    }
+
+    const deliveryProblems = await DeliveryProblem.findAll({
+      attributes: ['id', 'description'],
+      where: { delivery_id },
+    });
+
+    return res.json(deliveryProblems);
+  }
+
+  async delete(req, res) {
+    const { problem_id } = req.params;
+
+    const deliveryProblem = await DeliveryProblem.findByPk(problem_id);
+
+    if (!deliveryProblem) {
+      return res.status(400).json('Delivery problem not found');
+    }
+
+    const { delivery_id } = deliveryProblem;
+
+    const delivery = await Delivery.findByPk(delivery_id);
+
+    if (!delivery) {
+      return res.status(400).json({ error: 'Delivery does not exists' });
+    }
+
+    if (delivery.canceled_at) {
+      return res.status(400).json({ error: 'Delivery already canceled' });
+    }
+
+    await delivery.update({ canceled_at: new Date() });
+
+    return res.json(delivery);
   }
 }
 

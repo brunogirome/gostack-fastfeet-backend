@@ -33,6 +33,11 @@ routes.get('/deliverymans/:id/delivereds', DeliveredController.index);
 
 routes.get('/files/:id', FileController.show);
 
+routes.post(
+  '/deliveries/:delivery_id/problems',
+  DeliveryProblemController.store
+);
+
 /**
  * Routes that need authetication
  */

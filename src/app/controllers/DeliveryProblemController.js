@@ -1,3 +1,4 @@
+import * as Yup from 'yup';
 import DeliveryProblem from '../models/DeliveryProblem';
 import Delivery from '../models/Delivery';
 import Recipient from '../models/Recipient';
@@ -53,7 +54,32 @@ class DeliveryProblemController {
     return res.json(deliverys);
   }
 
-  async store(req, res) {}
+  async store(req, res) {
+    const schema = Yup.object().shape({
+      description: Yup.string().required(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation fails' });
+    }
+
+    const { delivery_id } = req.params;
+
+    const delivery = await Delivery.findByPk(delivery_id);
+
+    if (!delivery) {
+      return res.status(400).json({ error: 'Delivery does not exists' });
+    }
+
+    const { description } = req.body;
+
+    const { id } = await DeliveryProblem.create({
+      delivery_id,
+      description,
+    });
+
+    return res.json({ id, delivery_id, description });
+  }
 }
 
 export default new DeliveryProblemController();

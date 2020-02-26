@@ -10,7 +10,7 @@ class AvaliableMail {
     const { delivery, recipient, deliveryman } = data;
 
     await Mail.sendMail({
-      to: `${recipient.recipient_name} <${deliveryman.email}>`,
+      to: `${deliveryman.name} <${deliveryman.email}>`,
       subject: 'New delivery avalible',
       template: 'new-delivery',
       context: {

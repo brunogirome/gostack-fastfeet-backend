@@ -4,6 +4,8 @@ import Delivery from '../models/Delivery';
 import Recipient from '../models/Recipient';
 import Deliveryman from '../models/Deliveryman';
 import File from '../models/File';
+import Queue from '../../lib/Queue';
+import CanceledMail from '../jobs/CanceledMail';
 
 class DeliveryProblemController {
   async index(req, res) {
@@ -122,6 +124,14 @@ class DeliveryProblemController {
     }
 
     await delivery.update({ canceled_at: new Date() });
+
+    const deliveryman = await Deliveryman.findByPk(delivery.deliveryman_id);
+
+    await Queue.add(CanceledMail.key, {
+      deliveryProblem,
+      delivery,
+      deliveryman,
+    });
 
     return res.json(delivery);
   }

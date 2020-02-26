@@ -1,12 +1,11 @@
 import * as Yup from 'yup';
-
 import { isBefore, parseISO, format } from 'date-fns';
 import Delivery from '../models/Delivery';
 import Recipient from '../models/Recipient';
 import Deliveryman from '../models/Deliveryman';
 import File from '../models/File';
-
-import Mail from '../../lib/Mail';
+import Queue from '../../lib/Queue';
+import AvaliableMail from '../jobs/AvaliableMail';
 
 class DeliveryController {
   async store(req, res) {
@@ -36,23 +35,7 @@ class DeliveryController {
 
     const delivery = await Delivery.create(req.body);
 
-    await Mail.sendMail({
-      to: `${recipient.recipient_name} <${deliveryman.email}>`,
-      subject: 'New delivery avalible',
-      template: 'new-delivery',
-      context: {
-        deliveryman: deliveryman.name,
-        product: delivery.product,
-        recipient: recipient.recipientName,
-        street: recipient.street,
-        number: recipient.number,
-        complement: recipient.complement,
-        city: recipient.city,
-        state: recipient.state,
-        zipCode: recipient.zipCode,
-        id: delivery.id,
-      },
-    });
+    await Queue.add(AvaliableMail.key, { delivery, recipient, deliveryman });
 
     return res.json(delivery);
   }
